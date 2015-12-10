@@ -22,10 +22,11 @@ function gotoFloor(floor) {
     // ----------------- State -----------------
 
     var State = function() {
-        this.DOOR_OPEN = 1;
-        this.DOOR_CLOSED = 2;
-        this.DOOR_MOVING = 3;
-        this.ARRIVED = 4;
+        this.IDLE = 1;
+        this.DOOR_OPEN = 2;
+        this.DOOR_CLOSED = 3;
+        this.DOOR_MOVING = 4;
+        this.ARRIVED = 5;
         this.curState = this.DOOR_OPEN;
     };
 
@@ -35,7 +36,11 @@ function gotoFloor(floor) {
             this.curState++;
             if (curState > this.ARRIVED) this.reset();
         },
-        isMoving: function() {this.curState === this.DOOR_MOVING;}
+
+        isIdle: function() {this.curState === this.IDLE;},
+        isMoving: function() {this.curState === this.DOOR_MOVING;},
+
+        setArrived: function() {this.curState = this.ARRIVED}
     };
 
     // ----------------- Elevator -----------------
@@ -55,10 +60,20 @@ function gotoFloor(floor) {
     Elevator.prototype = {
         advance: function() {
             if (this.state.isMoving()) {
+                // is this the desired floor
+                if (this.curFloor == this.desiredFloor) {
+                    this.tripCnt++;
+                    this.state.setArrived();
+                    if (this.tripCnt % 100 === 0) this.maintenance = true;  // todo: finish maintenance service code later
+                    return;
+                }    
+
+                // move elevator
                 this.direction = 0;
                 if (this.curFloor < this.desiredFloor) this.direction = 1;
                 else this.direction = -1;
                 this.curFloor = this.curFloor + this.direction;
+                this.floorCnt++;
             }
         },
         setDesiredFloor: function(f) {this.desiredFloor = f;}
