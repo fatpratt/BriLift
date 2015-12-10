@@ -21,34 +21,36 @@ function gotoFloor(floor) {
 
     // ----------------- State -----------------
 
-    var State = function() {
-        this.IDLE = 1;
-        this.DOOR_CLOSED = 2;
-        this.MOVING = 3;
-        this.ARRIVED = 4;
-        this.DOOR_OPEN = 5;
-        this.curState = this.IDLE;
+     var LiftState = function() {
+        this.IDLE = 1,
+        this.DOOR_CLOSE = 2,
+        this.MOVING = 3,
+        this.ARRIVED = 4,
+        this.DOOR_OPEN = 5,
+        this.curState = this.IDLE
     };
 
-    State.prototype = {
-        reset: function() {this.curState = 1;},
+    LiftState.prototype = {
         next: function() {
-            this.curState++;
-            if (this.curState > this.DOOR_OPEN) this.reset();
+                this.curState++;
+                if (this.curState > this.DOOR_OPEN) this.curState = 1;
+            },
+        reset: function() {this.curState = 1;},    
+        isIdle: function() {
+            return this.curState === 1;
         },
-
-        isIdle: function() {this.curState === this.IDLE;},
-        isMoving: function() {this.curState === this.MOVING;},
-
+        isMoving: function() {
+            return this.curState === 3;
+        },
         setCloseDoor: function() {this.curState = this.DOOR_CLOSE;},
-        setArrived: function() {this.curState = this.ARRIVED},
+        setArrived: function() {this.curState = this.ARRIVED;},
         getPrintableState: function() {
             if (this.curState === this.IDLE) return "idle";
-            if (this.curState === this.DOOR_CLOSED) return "door closed";
+            if (this.curState === this.DOOR_CLOSE) return "door closed";
             if (this.curState === this.MOVING) return "moving";
             if (this.curState === this.ARRIVED) return "arrived";                
             if (this.curState === this.DOOR_OPEN) return "door open";
-        }           
+        }   
     };
 
     // ----------------- Elevator -----------------
@@ -57,7 +59,7 @@ function gotoFloor(floor) {
         this.elevNum = elevNum;
         this.curFloor = 0;
         this.desiredFloor = 0;
-        this.state = new State();
+        this.state = new LiftState();
         this.direction = 0;
 
         this.floorCnt = 0;
