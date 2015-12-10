@@ -11,17 +11,39 @@ function setSelFloor(floor) {
 
 (function() {
 
+    // ----------------- State -----------------
+
+    var State = function() {
+        this.DOOR_OPEN = 1;
+        this.DOOR_CLOSED = 2;
+        this.DOOR_MOVING = 3;
+        this.DOOR_ARRIVED = 4;
+        this.curState = this.DOOR_OPEN;
+    };
+
+    State.prototype = {
+        reset: function() {this.curState = this.DOOR_OPEN;}
+    };
+
+    // ----------------- Elevator -----------------
+
     var Elevator = function(elevNum) {
         this.elevNum = elevNum;
         this.curFloor = 0;
         this.desiredFloor = 0;
-        console.log('elev create' + elevNum);
-    }
+        this.state = new State();
+        this.direction = 1;
+        this.floorCnt = 0;
+        this.tripCnt = 0;
+        this.maintenance = false;
+    };
 
     Elevator.prototype = {
         advance: function() {console.log('advance');},
-        setDesiredFloor: function(f) {this.desiredFloor = f; console.log('desiredfloor')}
-    }
+        setDesiredFloor: function(f) {this.desiredFloor = f;}
+    };
+
+    // ----------------- Simulator -----------------
 
     var Simulator = function(numElevators, numFloors) {
         this.numElevators = numElevators;
@@ -57,6 +79,8 @@ function setSelFloor(floor) {
         }
     };
 
+    // ----------------- doc ready -----------------
+
     $(document).ready(function() {
         console.log('ready');
         
@@ -77,9 +101,9 @@ function setSelFloor(floor) {
                     var element = document.createElement("input");
                     element.setAttribute("type", "button");
                     element.setAttribute("value", i + 1);
-                    if (label == 'elevSels')
+                    if (label == 'elevBtnBar')
                         element.setAttribute("onclick", "setSelElevator(" + i + ")");
-                    if (label == 'elevBtns')
+                    if (label == 'floorBtnBar')
                         element.setAttribute("onclick", "setSelFloor(" + i + ")");
 
                     var btnBarDiv = document.getElementById(label);
