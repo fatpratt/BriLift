@@ -9,6 +9,14 @@ function setSelFloor(floor) {
     simulator.setSelFloor(floor);  
 };
 
+function callFromFloor(floor) {
+    console.log('set goto floor');
+};
+
+function gotoFloor(floor) {
+    console.log('set goto floor');
+};
+
 (function() {
 
     // ----------------- State -----------------
@@ -17,12 +25,17 @@ function setSelFloor(floor) {
         this.DOOR_OPEN = 1;
         this.DOOR_CLOSED = 2;
         this.DOOR_MOVING = 3;
-        this.DOOR_ARRIVED = 4;
+        this.ARRIVED = 4;
         this.curState = this.DOOR_OPEN;
     };
 
     State.prototype = {
-        reset: function() {this.curState = this.DOOR_OPEN;}
+        reset: function() {this.curState = 1;},
+        next: function() {
+            this.curState++;
+            if (curState > this.ARRIVED) this.reset();
+        },
+        isMoving: function() {this.curState === this.DOOR_MOVING;}
     };
 
     // ----------------- Elevator -----------------
@@ -32,14 +45,22 @@ function setSelFloor(floor) {
         this.curFloor = 0;
         this.desiredFloor = 0;
         this.state = new State();
-        this.direction = 1;
+        this.direction = 0;
+
         this.floorCnt = 0;
         this.tripCnt = 0;
         this.maintenance = false;
     };
 
     Elevator.prototype = {
-        advance: function() {console.log('advance');},
+        advance: function() {
+            if (this.state.isMoving()) {
+                this.direction = 0;
+                if (this.curFloor < this.desiredFloor) this.direction = 1;
+                else this.direction = -1;
+                this.curFloor = this.curFloor + this.direction;
+            }
+        },
         setDesiredFloor: function(f) {this.desiredFloor = f;}
     };
 
@@ -105,6 +126,10 @@ function setSelFloor(floor) {
                         element.setAttribute("onclick", "setSelElevator(" + i + ")");
                     if (label == 'floorBtnBar')
                         element.setAttribute("onclick", "setSelFloor(" + i + ")");
+                    if (label == 'callFloorBtnBar')
+                        element.setAttribute("onclick", "callFromFloor(" + i + ")");
+                    if (label == 'gotoFloorBtnBar')
+                        element.setAttribute("onclick", "gotoFloor(" + i + ")");
 
                     var btnBarDiv = document.getElementById(label);
                     btnBarDiv.appendChild(element);
@@ -113,6 +138,9 @@ function setSelFloor(floor) {
 
             makeBtnRow('elevBtnBar', parseInt(numElevators, 10));
             makeBtnRow('floorBtnBar', parseInt(numFloors, 10));
+
+            makeBtnRow('callFloorBtnBar', parseInt(numFloors, 10));
+            makeBtnRow('gotoFloorBtnBar', parseInt(numFloors, 10));
         });
     });
 })();
