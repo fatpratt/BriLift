@@ -24,7 +24,7 @@ function gotoFloor(floor) {
     var State = function() {
         this.IDLE = 1;
         this.DOOR_CLOSED = 2;
-        this.DOOR_MOVING = 3;
+        this.MOVING = 3;
         this.ARRIVED = 4;
         this.DOOR_OPEN = 5;
         this.curState = this.IDLE;
@@ -38,10 +38,17 @@ function gotoFloor(floor) {
         },
 
         isIdle: function() {this.curState === this.IDLE;},
-        isMoving: function() {this.curState === this.DOOR_MOVING;},
+        isMoving: function() {this.curState === this.MOVING;},
 
         setCloseDoor: function() {this.curState = this.DOOR_CLOSE;},
-        setArrived: function() {this.curState = this.ARRIVED}
+        setArrived: function() {this.curState = this.ARRIVED},
+        getPrintableState: function() {
+            if (this.curState === this.IDLE) return "idle";
+            if (this.curState === this.DOOR_CLOSED) return "door closed";
+            if (this.curState === this.MOVING) return "moving";
+            if (this.curState === this.ARRIVED) return "arrived";                
+            if (this.curState === this.DOOR_OPEN) return "door open";
+        }           
     };
 
     // ----------------- Elevator -----------------
@@ -84,8 +91,12 @@ function gotoFloor(floor) {
                 }
             }                
         },
-        setDesiredFloor: function(f) {this.desiredFloor = f;}
+        setDesiredFloor: function(f) {this.desiredFloor = f;},
         startMoving: function(f) {this.state.setCloseDoor()},
+        dumpCurStatus: function() {
+            console.log('Elevator: ' + (this.elevNum + 1) +  ' CurFloor: ' + (this.curFloor + 1) + ' State:' + this.state.getPrintableState());
+        }
+
     };
 
     // ----------------- Simulator -----------------
@@ -101,6 +112,7 @@ function gotoFloor(floor) {
     Simulator.prototype = {
         setSelElevator: function(e) {this.selElevator = e;},
         setSelFloor: function(f) {
+            // check maintenance mode here
             this.selFloor = f; 
             this.elevatorList[this.selElevator].setDesiredFloor(f)
             this.elevatorList[this.selElevator].startMoving(f);
@@ -118,6 +130,7 @@ function gotoFloor(floor) {
             var simLoop = function() {      
                 for (var j = 0; j < self.elevatorList.length; j++) {
                     self.elevatorList[j].advance();
+                    self.elevatorList[j].dumpCurStatus();
                 }
                 setTimeout(simLoop, 3000);
             }
